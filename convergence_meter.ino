@@ -36,17 +36,20 @@ void setupPins() {
 }
 
 //Interrupt routine that PWMs the BCD to make nixie tubes appear as if they're fading
+//The switching period can be found by multiplying BRIGHTNESS_LEVELS with TIMER_DELAY
+//Using a value of 280us, we roughly get 55 cycles/second, fast enough to fool the
+//human eye into thinking the fading is smooth
 void timeDisplayInterrupt() {
   ticker++;
 
-  //Debug interrupt frequency
+  //Flip the state of debugPin every single time interrupt is called
   PORTB = ~(PORTB >> debugPin) << debugPin;
-  
+
   if (ticker > BRIGHTNESS_LEVELS) {
-    ticker = 0;
+    ticker = 0; //Reset ticker
   }
 
-  int currentTick = ticker * TICKER_STEP;
+  int currentTick = ticker * TICKER_STEP; //map ticker to 0-TICKER_STEP * BRIGHTNESS_LEVELS
 
   if (currentTick >= brightness) {
     outBCD(previousSec);
@@ -132,10 +135,10 @@ void loop() {
     //upon detecting that the second has changed, fade to new second
     //unsigned long currentMil = millis();
     if (flashConvergence) {
-      digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-      delay(1000);              // wait for a second
-      digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
-      delay(1000);              // wait for a second
+      //digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
+      //delay(1000);              // wait for a second
+      //digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
+      //delay(1000);              // wait for a second
 
       fadeClear();  //clear display
       randomFlash();  //cool lightshow
@@ -163,7 +166,7 @@ void loop() {
 
       fadeClear();  //clear display
       delay(1500);  //delay for emphasis
-      flashConvergence = false;   //allow for
+      flashConvergence = false;   //allow for another trigger
     } else {
       crossFade(second());
     }
